@@ -60,7 +60,7 @@ title('After Masking')
 
 %% Check data
 CheckData.CycleNo = 96;
-CheckData.CrankAngle = -280;
+CheckData.CrankAngle = -90;
 
 [ ~, CheckData.CrankAngleNo_Raw ] = ismember( CheckData.CrankAngle, RawData.CrankAngle );
 [ ~, CheckData.CrankAngleNo_Using ] = ismember( CheckData.CrankAngle, MaskedData.CrankAngle );
