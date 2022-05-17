@@ -1,5 +1,5 @@
 %% Pre-requisites
-% Run main_SB first to get PODApproxx
+% Run main_SB first to get PODApprox
 
 %% Set crank angle
 cad = -90;

@@ -1,3 +1,6 @@
+%% Load data
+
+
 %% Parameters setting
 AnalysisResult.CrankAngle = [ -270 ];                                   % Change this line to allow more crank angles (avaiable from -295 to -60 CAD aTDCf)
 AnalysisResult.CycleNo = 1:300;                                   % Do not change this line
@@ -15,7 +18,7 @@ for ca_No = 1 : length( AnalysisResult.CrankAngleIndex )
     fprintf( 'CA = %.0f CAD aTDCf \n', CurrentCrankAngle )
 
     temp_velo_data = complex( PODData.U{ AnalysisResult.CrankAngleIndex( ca_No ) }, PODData.V{ AnalysisResult.CrankAngleIndex( ca_No ) } );
-    temp_PODResult = Perform_POD( temp_velo_data, 'Centered', 'Direct' );
+    temp_PODResult = Perform_POD_SB( temp_velo_data, 'Centered', 'Direct' );
 
     temp_PODResult.X_PODGrid = PODData.X{ AnalysisResult.CrankAngleIndex( ca_No ) };
     temp_PODResult.Y_PODGrid = PODData.Y{ AnalysisResult.CrankAngleIndex( ca_No ) };
@@ -28,8 +31,15 @@ for ca_No = 1 : length( AnalysisResult.CrankAngleIndex )
     AnalysisResult.PODResult{ ca_No } = temp_PODResult;
 end
 
+%% Gavish Donoho
+svs = diag(AnalysisResult.PODResult{1,1}.svdS);
+beta = PODResult{1,1}.nColsInOriginalGrid/PODResult{1,1}.nRowsInOriginalGrid;
+tau = optimal_SVHT_coef(beta,0) * median(svs); % find cut-off tau
+modes = svs(svs>tau);
+GDmode = length(modes); % Gavish Donoho threshold mode
+
 %% POD approx paramters
-nModes = [ 0 1 2 5 8 20 299 ];
+nModes = [ 0 1 2 5 8 20 299 GDmode ];
 CycleNo = 95;
 
 %% 
