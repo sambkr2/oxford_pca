@@ -1,17 +1,5 @@
-%% Clean up
-clear all %#ok<CLALL>
-close all
-clc
-
-%% Load data
-myData = matfile( '../dataformatting/x20190517_CrossTumble_CR12p5_T1_C33_DVA_Motored_Processed.mat' );
-DataNamePrefix = 'CTPCR12p5T1C33DVA_PODonly';
-
-MaskedData = myData.MaskedData;
-PODData = myData.PODData;
-
 %% Parameters setting
-AnalysisResult.CrankAngle = [ -300 ];                                   % Change this line to allow more crank angles (avaiable from -295 to -60 CAD aTDCf)
+AnalysisResult.CrankAngle = [ -270 ];                                   % Change this line to allow more crank angles (avaiable from -295 to -60 CAD aTDCf)
 AnalysisResult.CycleNo = 1:300;                                   % Do not change this line
 
 [ ~, AnalysisResult.CrankAngleIndex ] = ismember( AnalysisResult.CrankAngle, PODData.CrankAngle );
@@ -40,21 +28,9 @@ for ca_No = 1 : length( AnalysisResult.CrankAngleIndex )
     AnalysisResult.PODResult{ ca_No } = temp_PODResult;
 end
 
-%% Calculate POD approximations
-% calc.nModes = [ 0 1 2 5 8 20 299 ];
-% calc.CrankAngle = -90;
-% calc.CycleNo = 1:300;
-% [ ~, calc.CrankAngleIndex ] = ismember( calc.CrankAngle, AnalysisResult.CrankAngle );
-% 
-% test_PODResult = AnalysisResult.PODResult{ calc.CrankAngleIndex };
-% [ test_PODApprox ] = Calc_PODApprox( test_PODResult, calc.nModes, calc.CycleNo );
-
 %% POD approx paramters
 nModes = [ 0 1 2 5 8 20 299 ];
-CycleNo = 96;
-
-% Create matrix of ensemble mean for subtraction
-% meanSB = repmat(PODResult{1,1}.EnsembleMean, 1, 300);
+CycleNo = 95;
 
 %% 
 figureprop.axes_lim = [ -25 25 -30 10 ];
@@ -62,15 +38,13 @@ figureprop.xlabel = '{\it x} (mm)';
 figureprop.ylabel = '{\it z} (mm)';
 
 figureprop.sparse_vector = 2;
-figureprop.Clim = [ 0 15 ];
+figureprop.Clim = [ 0 50 ];
 
 %%
 PODResult = AnalysisResult.PODResult;
-InterpolatedData = myData.InterpolatedData;
+% InterpolatedData = myData.InterpolatedData;
 
 %% Plot POD approx
-% structArray1 = struct('field1',[], 'field2',[], 'field3',[]);
-
 for mm = 1 : length( nModes )
     [ PODApprox ] = Calc_PODApprox( PODResult{1,1}, nModes(mm), CycleNo );
 %     PODApprox.X = MaskedData.X;
@@ -85,3 +59,31 @@ for mm = 1 : length( nModes )
 %     export_fig( [ 'TP Cycle ', num2str( cycle_No ), ' POD Approx at -270 CAD aTDCf' ], '-pdf', '-nocrop', '-append' )
 %     close all
 end
+
+%% Load CFD
+load('rrT1rng/ccm_T1_mot_CTP.mat')
+
+%% Plot CFD 
+temp_x = CFDData.Data.y_PIVGrid;
+temp_y = CFDData.Data.z_PIVGrid;
+temp_CCM_u = ccmdata.(ccm_cad).v;
+temp_CCM_v = ccmdata.(ccm_cad).w;
+temp_CCM_SpeedMap = abs( complex( temp_CCM_u, temp_CCM_v ) );
+
+% Add PIV mask to CFD 
+[ ~, PIV_CAindex ] = ismember( AnalysisResult.CrankAngle, InterpolatedData.CrankAngle );
+
+temp_PIVem_u = nanmean( InterpolatedData.U( :,:,PIV_CAindex,: ), 4 );
+temp_PIVem_v = nanmean( InterpolatedData.V( :,:,PIV_CAindex,: ), 4 );
+temp_PIVem_SpeedMap = abs( complex( temp_PIVem_u, temp_PIVem_v ) );
+
+temp_PIV_mask = ~isnan( temp_PIVem_SpeedMap );
+temp_PIV_mask = double( temp_PIV_mask );
+temp_PIV_mask( temp_PIV_mask==0 ) = NaN;
+temp_CCM_u = temp_CCM_u .* temp_PIV_mask;
+temp_CCM_v = temp_CCM_v .* temp_PIV_mask;
+temp_CCM_SpeedMap = temp_CCM_SpeedMap .* temp_PIV_mask;
+
+ColourQuiver_SB(temp_x, temp_y, temp_CCM_u ,temp_CCM_v, figureprop)
+ylim([-20 2])
+title('RNG')
