@@ -1,8 +1,8 @@
 %% RI calcs
 % RI.piv_cd = Find_Relevance_Index( complex( temp_PIVem_u, temp_PIVem_v ), complex( temp_CFD_u, temp_CFD_v ), 'normal_num' );
-relevance_index = zeros(60, 2);
+relevance_index = zeros(length(files), 1);
 
-for i = -330:5:-35
+for i = cadFirst:cadStep:cadFirst+cadStep*(length(files)-1)
     
     [ ~, PIV_CAindex ] = ismember( i, PIVData.Data.CrankAngle );
     temp_piv_u = nanmean( PIVData.Data.u( :,:,PIV_CAindex,: ), 4 );
@@ -21,30 +21,12 @@ for i = -330:5:-35
     temp_ccm_v = temp_ccm_v .* temp_PIV_mask;
 
     temp_RI_piv_ccm = Find_Relevance_Index( complex( temp_piv_u, temp_piv_v ), complex( temp_ccm_u, temp_ccm_v ), 'normal_num' );
-    relevance_index(PIV_CAindex,2) = temp_RI_piv_ccm;
-    relevance_index(PIV_CAindex,1) = i;
+    relevance_index(PIV_CAindex) = temp_RI_piv_ccm;
     
 %     str = string(sprintf('%d',i));
 %     app = append('Crank angle ', str, ' complete')
     
 end
-
-%% GDem relevance index
-% for ccm_cad = 'm285'
-temp_piv_u = gdU;
-temp_piv_v = gdV;
-temp_PIVem_SpeedMap = abs( complex( temp_piv_u, temp_piv_v ) );
-
-temp_ccm_u = ccmdata.(ccm_cad).u;
-temp_ccm_v = ccmdata.(ccm_cad).w;
-
-temp_PIV_mask = ~isnan( temp_PIVem_SpeedMap );
-temp_PIV_mask = double( temp_PIV_mask );
-temp_PIV_mask( temp_PIV_mask==0 ) = NaN;
-temp_ccm_u = temp_ccm_u .* temp_PIV_mask;
-temp_ccm_v = temp_ccm_v .* temp_PIV_mask;
-
-ri = Find_Relevance_Index( complex( temp_piv_u, temp_piv_v ), complex( temp_ccm_u, temp_ccm_v ), 'normal_num' );
 
 %%
 riT1rkeSie = [(cadFirst:cadStep:cadFirst+cadStep*(length(files)-1))', relevance_index];

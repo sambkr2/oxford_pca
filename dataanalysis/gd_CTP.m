@@ -2,7 +2,7 @@
 
 
 %% Parameters setting
-AnalysisResult.CrankAngle = [ -270 ];                                   % Change this line to allow more crank angles (avaiable from -295 to -60 CAD aTDCf)
+AnalysisResult.CrankAngle = [ -265 ];                                   % Change this line to allow more crank angles (avaiable from -295 to -60 CAD aTDCf)
 AnalysisResult.CycleNo = 1:300;                                   % Do not change this line
 
 [ ~, AnalysisResult.CrankAngleIndex ] = ismember( AnalysisResult.CrankAngle, PODData.CrankAngle );
@@ -40,6 +40,8 @@ GDmode = length(modes); % Gavish Donoho threshold mode
 
 %% POD approx paramters
 nModes = [ 0 1 2 5 8 20 299 GDmode ];
+% nModes = [ 0:1:298 ];
+% CycleNo = [1:1:10];
 CycleNo = 95;
 
 %% 
@@ -63,9 +65,11 @@ for mm = 1 : length( nModes )
     PODApprox.Y = InterpolatedData.Y;
     PODVel.(['POD',num2str(nModes(mm))]).u = PODApprox.U;
     PODVel.(['POD',num2str(nModes(mm))]).v = PODApprox.V;
+    
     figure_output = ColourQuiver_SB( PODApprox.X, PODApprox.Y, PODApprox.U, PODApprox.V, figureprop );
     ylim([-20 2])
     title( [ 'POD Approx., Order = ', num2str( nModes(mm) )] );
+
 %     export_fig( [ 'TP Cycle ', num2str( cycle_No ), ' POD Approx at -270 CAD aTDCf' ], '-pdf', '-nocrop', '-append' )
 %     close all
 end

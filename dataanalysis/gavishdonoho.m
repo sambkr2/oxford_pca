@@ -1,5 +1,8 @@
+%% Load tumble
+load('../dataformatting/x20180706_Tumble_CR12p5_T1_C33_DVA_Motored_Processed.mat');
+
 %% Parameters setting
-AnalysisResult.CrankAngle = [ -90 ];                                   % Change this line to allow more crank angles (avaiable from -295 to -60 CAD aTDCf)
+AnalysisResult.CrankAngle = [ -285 ];                                   % Change this line to allow more crank angles (avaiable from -295 to -60 CAD aTDCf)
 AnalysisResult.CycleNo = 1:300;                                   % Do not change this line
 
 [ ~, AnalysisResult.CrankAngleIndex ] = ismember( AnalysisResult.CrankAngle, PODData.CrankAngle );
@@ -30,7 +33,7 @@ end
 
 %% POD approx paramters
 nModes = [ 0 1 2 5 8 20 299 ];
-CycleNo = 96;
+CycleNo = 56;
 
 %% 
 figureprop.axes_lim = [ -25 25 -30 10 ];
@@ -38,7 +41,7 @@ figureprop.xlabel = '{\it x} (mm)';
 figureprop.ylabel = '{\it z} (mm)';
 
 figureprop.sparse_vector = 2;
-figureprop.Clim = [ 0 15 ];
+figureprop.Clim = [ 0 50 ];
 
 %%
 PODResult = AnalysisResult.PODResult;
@@ -70,7 +73,7 @@ GDmode = length(modes); % Gavish Donoho threshold mode
 
 %% POD approx paramters
 nModes = [ 0 1 2 5 8 20 299 GDmode ];
-CycleNo = 96;
+CycleNo = 56;
 
 %% 
 figureprop.axes_lim = [ -25 25 -30 10 ];
@@ -78,7 +81,7 @@ figureprop.xlabel = '{\it x} (mm)';
 figureprop.ylabel = '{\it z} (mm)';
 
 figureprop.sparse_vector = 2;
-figureprop.Clim = [ 0 15 ];
+figureprop.Clim = [ 0 50 ];
 
 %% Plot POD approx
 for mm = 1 : length( nModes )
@@ -95,3 +98,38 @@ for mm = 1 : length( nModes )
 %     export_fig( [ 'TP Cycle ', num2str( cycle_No ), ' POD Approx at -270 CAD aTDCf' ], '-pdf', '-nocrop', '-append' )
 %     close all
 end
+
+%% Calculate ensemble mean of GDmode
+PODCyc = nan(PODData.nRowsInOriginal * PODData.nColsInOriginal, 300);
+
+for ii = 1:300
+    [ PODApprox ] = Calc_PODApprox( PODResult{1,1}, GDmode, ii );
+    PODApprox.X = InterpolatedData.X;
+    PODApprox.Y = InterpolatedData.Y;
+
+    % Turn velocity values into column vectors
+    tempu = reshape(PODApprox.U,[],1); 
+    tempv = reshape(PODApprox.V,[],1);
+    
+    % Store as complex number with each column as a new cycle
+    PODcyc.(['cyc',num2str(ii)]) = complex(tempu,tempv);
+    PODCyc(:,ii) = complex(tempu,tempv);
+    
+    % Average along the rows to get the ensemble mean
+    colGDem = mean(PODCyc,2);
+    
+    % Reshape into matrix
+    GDem = reshape(colGDem, PODData.nRowsInOriginal, PODData.nColsInOriginal);
+end
+
+%% Plot GDem
+PODApprox.X = InterpolatedData.X;
+PODApprox.Y = InterpolatedData.Y;
+gdU = real(GDem);
+gdV = imag(GDem);
+figure_output = ColourQuiver_SB( PODApprox.X, PODApprox.Y, gdU, gdV, figureprop );
+ylim([-30 10])
+line1 = ['Gavish Donoho ensemble mean'];
+line2 = [t_cad,' CAD, ','POD Order = ', num2str( GDmode )];
+title({line1,line2});
+set(gcf, 'position', [440 352 560 446])

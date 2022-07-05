@@ -1,5 +1,5 @@
 %% Pre-requisites
-% Run main_SB first to get PODApprox
+% Run main_CTP_analysis first to get PODVel
 
 %% Set crank angle
 cad = -285;
@@ -8,6 +8,7 @@ ccm_cad = strrep(cadstr,'-','m');
 
 %% Load ccm data
 % load('ccm_T1_mot.mat')
+load('rrT1rng/ccm_T1_mot_CTP.mat')
 
 %% One cycle
 ri = zeros(length(nModes), 2);
@@ -89,7 +90,7 @@ ylabel('Relevance index [-]','FontSize',22)
 % legend('RKE2L init','RKE2L def','location','northwest')
 % set(axes1, 'xtick', -360:45:360)
 cycstr = num2str(CycleNo);
-title(['Cycle ',cycstr,', ',cadstr,' CAD'])
+title(['RANS vs POD modes, ',cadstr,' CAD'])
 
 %%
 % figure1 = figure( 'Color', [ 1 1 1 ] );
