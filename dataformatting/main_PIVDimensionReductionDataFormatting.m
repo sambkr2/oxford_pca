@@ -10,7 +10,8 @@ close all
 clc
 
 %% Load data
-myData = matfile( 'x20180810_Tumble_CR11_T2_C33_DVA_Motored.mat' );
+% myData = matfile( 'x20180810_Tumble_CR11_T2_C33_DVA_Motored.mat' );
+myData = matfile('../../JLR/baseline/matlab/x20180706_Tumble_CR12p5_T1_C33_DVA_Motored.mat');
 
 PIVData = myData.PIVData;
 Parameters = myData.Parameters;

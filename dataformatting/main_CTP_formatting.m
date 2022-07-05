@@ -18,10 +18,28 @@ RawData.V = PIVData.Data.w;
 RawData.CrankAngle = PIVData.Data.CrankAngle;
 RawData.nCycle = size( PIVData.Data.CycleNo, 2 );  
 
+%% Check cycles
+CrankAngle_plot = -280;
+[ ~, CrankAngleNo_plot ] = ismember( CrankAngle_plot, RawData.CrankAngle );
+
+figureprop.axes_lim = [ -25 25 -20 2 ];
+figureprop.xlabel = '{\it x} (mm)';
+figureprop.ylabel = '{\it z} (mm)';
+figureprop.sparse_vector = 2;
+figureprop.Clim = [ 0 50 ];
+figureprop.velocity_normalisation = 1;
+
+for k = 1:300
+    ColourQuiver( RawData.X, RawData.Y, RawData.U( :, :, CrankAngleNo_plot, k ), RawData.V( :, :, CrankAngleNo_plot, k ), figureprop );
+    title( [ 'PIV cycle ', num2str( k )] )
+    name = ['PIV_m',num2str(CrankAngle_plot),'_cycle',num2str(k)];
+    saveas(gcf,['fig/T1/CTP/allcycles/',name])
+end
+
 %% Extra tumble plane intake valve mask (manual)
 close all
-CrankAngle_plot = -270;
-CycleNo_plot = 99;
+CrankAngle_plot = -280;
+CycleNo_plot = 1;
 [ ~, CrankAngleNo_plot ] = ismember( CrankAngle_plot, RawData.CrankAngle );
 
 figureprop.axes_lim = [ -25 25 -20 2 ];

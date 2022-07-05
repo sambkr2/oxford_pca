@@ -4,7 +4,8 @@ close all
 clc
 
 %% Load data
-myData = matfile( 'x20180706_Tumble_CR12p5_T1_C33_DVA_Motored.mat' );
+% myData = matfile( 'x20180706_Tumble_CR12p5_T1_C33_DVA_Motored.mat' );
+myData = matfile('../../JLR/baseline/matlab/x20180706_Tumble_CR12p5_T1_C33_DVA_Motored.mat');
 
 PIVData = myData.PIVData;
 Parameters = myData.Parameters;
@@ -20,15 +21,15 @@ RawData.nCycle = size( PIVData.Data.CycleNo, 2 );
 
 %% Extra tumble plane intake valve mask (manual)
 close all
-CrankAngle_plot = -30;
+CrankAngle_plot = -285;
 CycleNo_plot = 96;
 [ ~, CrankAngleNo_plot ] = ismember( CrankAngle_plot, RawData.CrankAngle );
 
-figureprop.axes_lim = [ -25 25 -12 10 ];
+figureprop.axes_lim = [ -25 25 -30 10 ];
 figureprop.xlabel = '{\it x} (mm)';
 figureprop.ylabel = '{\it z} (mm)';
 figureprop.sparse_vector = 2;
-figureprop.Clim = [ 0 15 ];
+figureprop.Clim = [ 0 50 ];
 figureprop.velocity_normalisation = 1;
 
 ColourQuiver_SB( RawData.X, RawData.Y, RawData.U( :, :, CrankAngleNo_plot, CycleNo_plot ), RawData.V( :, :, CrankAngleNo_plot, CycleNo_plot ), figureprop );
@@ -64,7 +65,7 @@ title('After Masking')
 
 %% Check data
 CheckData.CycleNo = 96;
-CheckData.CrankAngle = -90;
+CheckData.CrankAngle = -285;
 
 [ ~, CheckData.CrankAngleNo_Raw ] = ismember( CheckData.CrankAngle, RawData.CrankAngle );
 [ ~, CheckData.CrankAngleNo_Using ] = ismember( CheckData.CrankAngle, MaskedData.CrankAngle );
@@ -95,7 +96,7 @@ temp_answer = questdlg( 'Do you want to save the data (into the current MATLAB w
 switch temp_answer
     case 'Save'
         savepath = uigetdir;
-        save( fullfile( savepath, [ matlab.lang.makeValidName( Parameters.Info.save_name ), '_Processed' ] ), 'Parameters', 'InterpolatedData', 'MaskedData', 'PODData', 'CFDData', 'EngineData' );
+        save( fullfile( savepath, [ matlab.lang.makeValidName( Parameters.Info.save_name ), '_Processed_all' ] ), 'Parameters', 'InterpolatedData', 'MaskedData', 'PODData', 'CFDData', 'EngineData' );
         fprintf( 'Data saved under:\n %s \n Data filename is: %s \n', savepath, [ matlab.lang.makeValidName( Parameters.Info.save_name ), '_Processed' ] )
     case 'Do not save'
         fprintf( 'Data saving is skipped by the user.' )
