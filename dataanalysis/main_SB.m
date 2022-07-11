@@ -77,20 +77,20 @@ for mm = 1 : length( nModes )
 end
 
 %% Load CFD
-load('T1rke/ccm_T1_mot.mat')
+load('T1rng/ccm_T1_mot.mat')
 
 %% Plot CFD
-temp_x = myData.CFDData.Data.x_PIVGrid;
-temp_y = myData.CFDData.Data.z_PIVGrid;
+temp_x = CFDData.Data.x_PIVGrid;
+temp_y = CFDData.Data.z_PIVGrid;
 temp_CCM_u = ccmdata.(ccm_cad).u;
 temp_CCM_v = ccmdata.(ccm_cad).w;
 temp_CCM_SpeedMap = abs( complex( temp_CCM_u, temp_CCM_v ) );
 
 % Add PIV mask to CFD 
-[ ~, PIV_CAindex ] = ismember( AnalysisResult.CrankAngle, myData.InterpolatedData.CrankAngle );
+[ ~, PIV_CAindex ] = ismember( AnalysisResult.CrankAngle, InterpolatedData.CrankAngle );
 
-temp_PIVem_u = nanmean( myData.InterpolatedData.U( :,:,PIV_CAindex,: ), 4 );
-temp_PIVem_v = nanmean( myData.InterpolatedData.V( :,:,PIV_CAindex,: ), 4 );
+temp_PIVem_u = nanmean( InterpolatedData.U( :,:,PIV_CAindex,: ), 4 );
+temp_PIVem_v = nanmean( InterpolatedData.V( :,:,PIV_CAindex,: ), 4 );
 temp_PIVem_SpeedMap = abs( complex( temp_PIVem_u, temp_PIVem_v ) );
 
 temp_PIV_mask = ~isnan( temp_PIVem_SpeedMap );
@@ -100,4 +100,5 @@ temp_CCM_u = temp_CCM_u .* temp_PIV_mask;
 temp_CCM_v = temp_CCM_v .* temp_PIV_mask;
 temp_CCM_SpeedMap = temp_CCM_SpeedMap .* temp_PIV_mask;
 
-ColourQuiver( temp_x, temp_y, temp_CCM_u, temp_CCM_v, figureprop )
+ColourQuiver_SB( temp_x, temp_y, temp_CCM_u, temp_CCM_v, figureprop )
+title( [ 'CFD ', num2str( CrankAngle_plot ), ' CAD'] );

@@ -31,12 +31,18 @@ end
 
 %% GDem relevance index
 % for ccm_cad = 'm285'
-temp_piv_u = gdU;
-temp_piv_v = gdV;
+temp_piv_u = PODVel.POD49.u;
+temp_piv_v = PODVel.POD49.v;
 temp_PIVem_SpeedMap = abs( complex( temp_piv_u, temp_piv_v ) );
+
+em_u = nanmean( PIVData.Data.u( :,:,PIV_CAindex,: ), 4 );
+em_v = nanmean( PIVData.Data.w( :,:,PIV_CAindex,: ), 4 );
 
 temp_ccm_u = ccmdata.(ccm_cad).u;
 temp_ccm_v = ccmdata.(ccm_cad).w;
+
+sing_u = PODVel.POD299.u;
+sing_v = PODVel.POD299.v;
 
 temp_PIV_mask = ~isnan( temp_PIVem_SpeedMap );
 temp_PIV_mask = double( temp_PIV_mask );
@@ -44,7 +50,7 @@ temp_PIV_mask( temp_PIV_mask==0 ) = NaN;
 temp_ccm_u = temp_ccm_u .* temp_PIV_mask;
 temp_ccm_v = temp_ccm_v .* temp_PIV_mask;
 
-ri = Find_Relevance_Index( complex( temp_piv_u, temp_piv_v ), complex( temp_ccm_u, temp_ccm_v ), 'normal_num' );
+ri = Find_Relevance_Index( complex( temp_piv_u, temp_piv_v ), complex( temp_ccm_u, temp_ccm_v ), 'normal_num' )
 
 %%
 riT1rkeSie = [(cadFirst:cadStep:cadFirst+cadStep*(length(files)-1))', relevance_index];
