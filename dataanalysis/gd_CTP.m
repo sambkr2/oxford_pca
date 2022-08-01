@@ -1,8 +1,8 @@
 %% Load data
-
+load('../dataformatting/x20190517_CrossTumble_CR12p5_T1_C33_DVA_Motored_Processed_all.mat')
 
 %% Parameters setting
-AnalysisResult.CrankAngle = [ -265 ];                                   % Change this line to allow more crank angles (avaiable from -295 to -60 CAD aTDCf)
+AnalysisResult.CrankAngle = [ -285 ];                                   % Change this line to allow more crank angles (avaiable from -295 to -60 CAD aTDCf)
 AnalysisResult.CycleNo = 1:300;                                   % Do not change this line
 
 [ ~, AnalysisResult.CrankAngleIndex ] = ismember( AnalysisResult.CrankAngle, PODData.CrankAngle );
@@ -39,16 +39,17 @@ modes = svs(svs>tau);
 GDmode = length(modes); % Gavish Donoho threshold mode
 
 %% POD approx paramters
-nModes = [ 0 1 2 5 8 20 299 GDmode ];
+% nModes = [ 0 1 2 5 8 20 299 GDmode ];
+nModes = [ 2 5 9 ];
 % nModes = [ 0:1:298 ];
 % CycleNo = [1:1:10];
-CycleNo = 95;
+CycleNo = 56;
 
 %% 
 figureprop.axes_lim = [ -25 25 -30 10 ];
 figureprop.xlabel = '{\it x} (mm)';
 figureprop.ylabel = '{\it z} (mm)';
-
+figureprop.velocity_normalisation = 5;
 figureprop.sparse_vector = 2;
 figureprop.Clim = [ 0 50 ];
 
@@ -66,10 +67,12 @@ for mm = 1 : length( nModes )
     PODVel.(['POD',num2str(nModes(mm))]).u = PODApprox.U;
     PODVel.(['POD',num2str(nModes(mm))]).v = PODApprox.V;
     
-    figure_output = ColourQuiver_SB( PODApprox.X, PODApprox.Y, PODApprox.U, PODApprox.V, figureprop );
+    figure_output = ColourQuiver( PODApprox.X, PODApprox.Y, PODApprox.U, PODApprox.V, figureprop );
     ylim([-20 2])
-    title( [ 'POD Approx., Order = ', num2str( nModes(mm) )] );
-
+%     title( [ 'POD Approx., Order = ', num2str( nModes(mm) )] );
+%     title(['PIV ensemble mean ',num2str(CurrentCrankAngle),' CAD'])
+    t = {['PIV cycle A, ',num2str(CurrentCrankAngle),' CAD'],['POD Approx., Order = ', num2str( nModes(mm) )]};
+    title(t)
 %     export_fig( [ 'TP Cycle ', num2str( cycle_No ), ' POD Approx at -270 CAD aTDCf' ], '-pdf', '-nocrop', '-append' )
 %     close all
 end
@@ -98,6 +101,6 @@ temp_CCM_u = temp_CCM_u .* temp_PIV_mask;
 temp_CCM_v = temp_CCM_v .* temp_PIV_mask;
 temp_CCM_SpeedMap = temp_CCM_SpeedMap .* temp_PIV_mask;
 
-ColourQuiver_SB(temp_x, temp_y, temp_CCM_u ,temp_CCM_v, figureprop)
+ColourQuiver(temp_x, temp_y, temp_CCM_u ,temp_CCM_v, figureprop)
 ylim([-20 2])
-title('RNG')
+title(['CFD ',num2str(CurrentCrankAngle),' CAD'])

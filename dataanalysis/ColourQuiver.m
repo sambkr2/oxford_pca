@@ -107,7 +107,7 @@ quiver( HighSpeedCoordinates_x, HighSpeedCoordinates_y, quiver_length * cos( Hig
 axis equal
 
 
-set( gca, 'FontSize', 16, 'FontName', 'Times New Roman', 'xtick', -100:10:100, 'ytick', -100:10:100 );
+set( gca, 'FontSize', 22, 'FontName', 'Times New Roman', 'xtick', -100:10:100, 'ytick', -100:10:100 );
 
 
 if ~isempty( figureprop.axes_lim )
