@@ -26,7 +26,7 @@ nValidPoints = length(originalIndex);
 SPODData.X = x(originalIndex);
 SPODData.Y = y(originalIndex);
 
-% Zero velocity data
+% Initialise velocity data
 SPODData.U = zeros( nValidPoints, nCycle );
 SPODData.V = zeros( nValidPoints, nCycle );
 
@@ -38,13 +38,12 @@ for cycle = 1:nCycle
     SPODData.V( :,cycle ) = temp_w(originalIndex);
 end
 
-% Tomorrow: What to do with SPODData? Turn into complex number?
-
 %% SPOD
 % Turn into complex number and transpose, so time in first dimension for
 % SPOD algorithm
 complex_velo = [complex( SPODData.U, SPODData.V )];
-complex_veloT = complex_velo';
+velo = [real(complex_velo); imag(complex_velo)];
+veloT = velo';
 
 % SPOD meaning:
 % The columns of L contain the modal energy spectra. 
@@ -60,12 +59,43 @@ rpm = 1500;
 dt = 1/(rpm/60)*2;
 
 % SPOD
-[L2,P2,f2] = spod(complex_veloT,[],[],[],dt);
+[L2,P2,f2] = spod(veloT,[],[],[],dt);
 
-% Why do I get negative frquencies? 
 % But first, just try to plot the SPOD modes by calculating SPODApprox
 % go through the algorithm step by step and plot
 
+%% Reconstruction
+% Number of velocity locations
+nVel = size(velo,1)/2;
+
+% First choose the SPOD modes and frequency to plot
+sMode = [1];
+fplot = [1];
+
+% Retrieve velocities
+spodU = P2(fplot,1:nVel,sMode)';
+spodV = P2(fplot,nVel+1:end,sMode)';
+
+% Reshape into PIV grid format
+pivx = size(CFDData.Data.x_PIVGrid,1);
+pivz = size(CFDData.Data.x_PIVGrid,2);
+splotu = NaN(pivx,pivz);
+splotv = NaN(pivx,pivz);
+splotu(originalIndex) = spodU;
+splotv(originalIndex) = spodV;
+
+%% Plot
+figureprop.axes_lim = [ -25 25 -30 10 ];
+figureprop.xlabel = '{\it x} (mm)';
+figureprop.ylabel = '{\it z} (mm)';
+% figureprop.velocity_normalisation = 5;
+figureprop.sparse_vector = 2;
+figureprop.Clim = [ 0 50 ];
+
+figure_output = ColourQuiver( MaskedData.X, MaskedData.Y, splotu*1000, splotv*1000, figureprop );    
+ylim([-30 10])
+
+%% Rubbish below
 %% Calc SPOD Approx
 originalrows = size(u,1);
 originalcols = size(u,2);

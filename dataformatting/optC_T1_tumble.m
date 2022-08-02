@@ -21,7 +21,7 @@ RawData.nCycle = size( PIVData.Data.CycleNo, 2 );
 
 %% Extra tumble plane intake valve mask (manual)
 close all
-CrankAngle_plot = -285;
+CrankAngle_plot = -295;
 CycleNo_plot = 96;
 [ ~, CrankAngleNo_plot ] = ismember( CrankAngle_plot, RawData.CrankAngle );
 
@@ -60,8 +60,11 @@ ColourQuiver_SB( RawData.X, RawData.Y, IntakeValve_MaskedData.U( :, :, CrankAngl
 title('After Masking')
 
 %% Format data
-% [ InterpolatedData, MaskedData, PODData ] = PIVDataFormatting( RawData.X, RawData.Y, IntakeValve_MaskedData.U, IntakeValve_MaskedData.V, RawData.CrankAngle );
-[ InterpolatedData, MaskedData, PODData ] = PIVDataFormatting( RawData.X, RawData.Y, RawData.U, RawData.V, RawData.CrankAngle );
+% Include mask
+[ InterpolatedData, MaskedData, PODData ] = PIVDataFormatting( RawData.X, RawData.Y, IntakeValve_MaskedData.U, IntakeValve_MaskedData.V, RawData.CrankAngle );
+
+% Remove mask
+% [ InterpolatedData, MaskedData, PODData ] = PIVDataFormatting( RawData.X, RawData.Y, RawData.U, RawData.V, RawData.CrankAngle );
 
 %% Check data
 CheckData.CycleNo = 96;
@@ -96,7 +99,7 @@ temp_answer = questdlg( 'Do you want to save the data (into the current MATLAB w
 switch temp_answer
     case 'Save'
         savepath = uigetdir;
-        save( fullfile( savepath, [ matlab.lang.makeValidName( Parameters.Info.save_name ), '_Processed_all' ] ), 'Parameters', 'InterpolatedData', 'MaskedData', 'PODData', 'CFDData', 'EngineData' );
+        save( fullfile( savepath, [ matlab.lang.makeValidName( Parameters.Info.save_name ), '_Processed_all_masked' ] ), 'Parameters', 'InterpolatedData', 'MaskedData', 'PODData', 'CFDData', 'EngineData' );
         fprintf( 'Data saved under:\n %s \n Data filename is: %s \n', savepath, [ matlab.lang.makeValidName( Parameters.Info.save_name ), '_Processed' ] )
     case 'Do not save'
         fprintf( 'Data saving is skipped by the user.' )
