@@ -52,7 +52,7 @@ function [output]=calculate_WMI(a_u,a_v,b_u,b_v,mask,varargin)
     
     % calculate median velocity present in either field to be used for
     % normalisation
-    V_Mag_med = nanmedian([V_Mag_aa(:) ; V_Mag_bb(:)]);
+    V_Mag_med = median([V_Mag_aa(:) ; V_Mag_bb(:)],'omitnan');
     
     % Calculating the difference on an absolute scale within the image and
     % then normalising by the median of either field

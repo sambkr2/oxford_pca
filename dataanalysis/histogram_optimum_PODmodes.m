@@ -24,13 +24,19 @@ fontname(figure3,"times")
 
 %% Histogram
 figure4 = figure( 'Color', [ 1 1 1 ] );
-axes4 = axes( 'Parent', figure4, 'FontSize', 20,'linewidth',1);
+axes4 = axes( 'Parent', figure4, 'FontSize', 24, 'fontname', 'times','linewidth',1);
 hold( axes4, 'on' )
 box( axes4, 'on')
 histogram(maxpodmode)
-xlabel('Optimum POD mode [-]')
-ylabel('Frequency [-]')
+xlabel('Optimum POD mode')
+ylabel('Number of cycles')
 t = {['Frequency of optimum POD modes']};
-title(t,'FontSize',20)
-fontname(gcf,"times")
+% title(t,'FontSize',20)
+% fontname(gcf,"times")
 xticks([0:1:12])
+xlim([-0.5 12.5])
+set(gcf,'Position',[439 377 608 420])
+
+%%
+pivname = ['/Users/sambaker/Documents/Oxford-Uni/Papers/dmd/fig/CTP/CTP_histogram.png'];
+exportgraphics(gcf,pivname,'resolution',600)

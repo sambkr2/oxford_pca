@@ -42,6 +42,8 @@ nModes = [ 0:299 ];
 CycleNo = [ 1:300 ];
 
 %% POD approx
+% Don't need to run this section: PODVel saved in
+% PODVel_tumble_m285_allcycles.mat
 for m = 1:length(CycleNo)
     for mm = 1 : length( nModes )
         [ PODApprox ] = Calc_PODApprox( PODResult{1,1}, nModes(mm), CycleNo(m) );
@@ -134,19 +136,27 @@ for cycle = 1:300
 end
 
 %% Plot all cycles
-figure
-hold on
-
+figure3 = figure( 'Color', [ 1 1 1 ] );
+axes3 = axes( 'Parent', figure3, 'FontSize', 24,'linewidth',1);
+hold( axes3, 'on' )
+box( axes3, 'on')
 for plotcyc = 1:300
-    
     c = num2str(plotcyc);
     d = ['cycle' c];
-    plot(ri2.(d)(:,1),ri2.(d)(:,2))
-    
+    plot(ri2.(d)(:,1),ri2.(d)(:,2), 'linewidth',1.5)    
 end
+xlim([0 300])
+ylim([0.6 1])
+xlabel('Number of POD modes')
+ylabel('Relevance index')
+% t = {['Tumble CFD against PIV POD modes'], ['all cycles, -285 CAD zoom']};
+% title(t,'FontSize',20)
+fontname(figure3,"times")
     
 %% Save
-save('rrT1rng/ri_pod_ccm_all_m270.mat','ri')
+% save('rrT1rng/ri_pod_ccm_all_m270.mat','ri')
+pivname = ['/Users/sambaker/Documents/Oxford-Uni/Papers/dmd/fig/TP/TP_allcycles_RI_zoom.png'];
+exportgraphics(gcf,pivname,'resolution',600)
 
 %% Plot
 figure1 = figure( 'Color', [ 1 1 1 ] );

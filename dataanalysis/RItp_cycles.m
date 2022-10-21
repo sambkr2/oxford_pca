@@ -2,16 +2,17 @@
 % Run main_CTP_analysis first to get PODVel
 
 % load ccm
-load('rrT1rng/ccm_T1_mot_CTP.mat')
+load('T1rng/ccm_T1_mot.mat')
+load('../dataformatting/x20180706_Tumble_CR12p5_T1_C33_DVA_Motored_Processed_all_masked.mat')
 
-%%
+%% Tumble
 % CCM data
 ri_ccm = zeros(300, 2);
 CrankAngle_plot = -285;
 [ ~, CrankAngleNo_plot ] = ismember( CrankAngle_plot, MaskedData.CrankAngle );
 str_cad = num2str(CrankAngle_plot);
 ccm_cad = strrep(str_cad,'-','m');
-ccm_u = ccmdata.(ccm_cad).v;
+ccm_u = ccmdata.(ccm_cad).u;
 ccm_v = ccmdata.(ccm_cad).w;
 
 % PIV ensemble mean
@@ -53,20 +54,26 @@ end
 
 %% Plot
 figure
-axes('fontname','serif','fontsize',20,'linewidth',2)
+axes('fontname','times','fontsize',24,'linewidth',2)
 hold on
+grid on
 % scatter(ri_ccm(:,1),ri_ccm(:,2),'filled')
 scatter(ri_em(:,1),ri_em(:,2),'filled')
+scatter(ri_em_ctp(:,1),ri_em_ctp(:,2),'filled','MarkerEdgeColor',[0.4940 0.1840 0.5560],'MarkerFaceColor',[0.4940 0.1840 0.5560])
 % yline(0.7)
 box on
-grid on
 % l = legend('ccm vs ind cycle','em vs ind cycle');
 % set(l,'location','southwest')
-title([str_cad,' CAD'])
+l = legend('Tumble plane','Cross-tumble plane');
+set(l,'location','southwest')
+% title([str_cad,' CAD'])
 xlabel('Cycle Number')
 ylabel('Relevance Index')
 ylim([0 1])
-mean(ri_em(:,2))
+
+%% Export
+name = ['/Users/sambaker/Documents/Oxford-Uni/Papers/dmd/fig/scatter.png'];
+exportgraphics(gcf,name,'resolution',600)
 
 %% 
 % row counter

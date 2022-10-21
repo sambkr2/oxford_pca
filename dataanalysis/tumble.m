@@ -9,7 +9,8 @@
 
 %% load data
 % TumbleData = load( 'x20180823_Tumble_CR12p5_T7_C33_DVA_Motored.mat' );
-load('x20180706_Tumble_CR12p5_T1_C33_DVA_Motored.mat');
+% load('x20180706_Tumble_CR12p5_T1_C33_DVA_Motored.mat');
+load('../../JLR/baseline/matlab/x20180706_Tumble_CR12p5_T1_C33_DVA_Motored.mat')
 
 %% Plot settings
 Plot_FontSize = 14;

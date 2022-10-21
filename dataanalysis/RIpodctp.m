@@ -39,7 +39,10 @@ PODResult = AnalysisResult.PODResult;
 
 %% POD approx paramters
 nModes = [ 0:299 ];
-CycleNo = [ 1:300 ];
+% CycleNo = [ 1:300 ];
+% nModes = [ 0 1 2 5 10 50 299 ];
+CycleNo = [35 36];
+cycstr = num2str(CycleNo);
 
 %% POD approx
 for m = 1:length(CycleNo)
@@ -71,12 +74,13 @@ for i = 1:length(nModes)
     
     temp_mode = num2str(nModes(i));
     temp_index = ['POD',temp_mode];
+    cyc_ind = ['Cycle',cycstr];
    
-    temp_piv_u = PODVel.(temp_index).u;
-    temp_piv_v = PODVel.(temp_index).v;
+    temp_piv_u = PODVel.(cyc_ind).(temp_index).u;
+    temp_piv_v = PODVel.(cyc_ind).(temp_index).v;
     temp_PIVem_SpeedMap = abs( complex( temp_piv_u, temp_piv_v ) );
     
-    temp_ccm_u = ccmdata.(ccm_cad).u;
+    temp_ccm_u = ccmdata.(ccm_cad).v;
     temp_ccm_v = ccmdata.(ccm_cad).w;
     
     temp_PIV_mask = ~isnan( temp_PIVem_SpeedMap );
@@ -97,7 +101,8 @@ end
 temp_ccm_u = ccmdata.(ccm_cad).v;
 temp_ccm_v = ccmdata.(ccm_cad).w;
 
-for cycle = 1:300
+% for cycle = 1:300
+for cycle = 35:36
     
     a = num2str(cycle);
     b = ['cycle' a];
@@ -135,39 +140,46 @@ end
 
 %% Plot all cycles
 figure3 = figure( 'Color', [ 1 1 1 ] );
-axes3 = axes( 'Parent', figure3, 'FontSize', 20,'linewidth',1);
+axes3 = axes( 'Parent', figure3, 'FontSize', 24,'linewidth',1);
 hold( axes3, 'on' )
 box( axes3, 'on')
 for plotcyc = 1:300
+% for plotcyc = 35:36
     
     c = num2str(plotcyc);
     d = ['cycle' c];
-    plot(ri2.(d)(:,1),ri2.(d)(:,2))
+    plot(ri2.(d)(:,1),ri2.(d)(:,2),'linewidth',1.5)
     
 end
 xlim([0 10])
-xlabel('Number of POD modes [-]')
-ylabel('Relevance index [-]')
-t = {['Cross-tumble CFD against PIV POD modes'], ['all cycles, -285 CAD zoom']};
-title(t,'FontSize',20)
+% ylim([0.4 0.9])
+xlabel('Number of POD modes')
+ylabel('Relevance index')
+% t = {['Cross-tumble CFD against PIV POD modes'], ['all cycles, -285 CAD zoom']};
+% title(t,'FontSize',20)
 fontname(figure3,"times")
+% legend('Cycle A', 'Cycle B')
+% grid on
+% set(gca, 'xtick', 0:50:300)
     
 %% Save
-save('rrT1rng/ri_pod_ccm_all_m270.mat','ri')
+% save('rrT1rng/ri_pod_ccm_all_m270.mat','ri')
+pivname = ['/Users/sambaker/Documents/Oxford-Uni/Papers/dmd/fig/CTP/CTP_allcycles_RI_zoom.png'];
+exportgraphics(gcf,pivname,'resolution',600)
 
 %% Plot
 figure3 = figure( 'Color', [ 1 1 1 ] );
-axes3 = axes( 'Parent', figure3, 'FontName', 'serif', 'FontSize', 14,'linewidth',1);
+axes3 = axes( 'Parent', figure3, 'FontName', 'times', 'FontSize', 24,'linewidth',1);
 hold( axes3, 'on' )
 box( axes3, 'on')
 plot(ri2.cycle1(:,1),ri2.cycle1(:,2),'linewidth',1.5)
 
-xlabel('Number of POD modes','FontSize',22)
-ylabel('Relevance index [-]','FontSize',22)
+xlabel('Number of POD modes')
+ylabel('Relevance index')
 % legend('RKE2L init','RKE2L def','location','northwest')
 % set(axes1, 'xtick', -360:45:360)
 cycstr = num2str(CycleNo);
-title(['Cycle ',cycstr,', ',cadstr,' CAD'])
+% title(['Cycle ',cycstr,', ',cadstr,' CAD'])
 
 %%
 % figure1 = figure( 'Color', [ 1 1 1 ] );

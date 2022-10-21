@@ -31,10 +31,23 @@ for ca_No = 1 : length( AnalysisResult.CrankAngleIndex )
     AnalysisResult.PODResult{ ca_No } = temp_PODResult;
 end
 
+PODResult = AnalysisResult.PODResult;
+% InterpolatedData = myData.InterpolatedData;
+
+%% Gavish Donoho
+svs = diag(AnalysisResult.PODResult{1,1}.svdS);
+beta = PODResult{1,1}.nColsInOriginalGrid/PODResult{1,1}.nRowsInOriginalGrid;
+tau = optimal_SVHT_coef(beta,0) * median(svs); % find cut-off tau
+modes = svs(svs>tau);
+GDmode = length(modes); % Gavish Donoho threshold mode
+
 %% POD approx paramters
-% nModes = [ 0 1 2 5 8 20 299 ];
+% nModes = [ 0 1 2 10 GDmode 299 ];
+% nModes = [ 1 2 5 10 50 299 ];
 nModes = [ 0 ];
-CycleNo = 56;
+CycleNo = 53;
+cycstr = num2str(CycleNo);
+cyc = ['cyc',cycstr];
 
 %% 
 figureprop.axes_lim = [ -25 25 -30 10 ];
@@ -43,10 +56,6 @@ figureprop.ylabel = '{\it z} (mm)';
 figureprop.velocity_normalisation = 5;
 figureprop.sparse_vector = 2;
 figureprop.Clim = [ 0 50 ];
-
-%%
-PODResult = AnalysisResult.PODResult;
-% InterpolatedData = myData.InterpolatedData;
 
 %% Plot POD approx
 
@@ -61,23 +70,21 @@ for mm = 1 : length( nModes )
 %     figure_output = ColourQuiver_SB( PODApprox.X, PODApprox.Y, PODApprox.U, PODApprox.V, figureprop );
     figure_output = ColourQuiver( PODApprox.X, PODApprox.Y, PODApprox.U, PODApprox.V, figureprop );    
     ylim([-30 10])
-    title(['PIV ensemble mean ',num2str(CurrentCrankAngle),' CAD'])
+    set(gca,'fontsize',26)
+%     title(['PIV ensemble mean ',num2str(CurrentCrankAngle),' CAD'])
 %     title( [ 'POD Approx., Order = ', num2str( nModes(mm) )] );
-%     export_fig( [ 'TP Cycle ', num2str( cycle_No ), ' POD Approx at -270 CAD aTDCf' ], '-pdf', '-nocrop', '-append' )
-%     close all
+%     annotation('line', [0.49 0.54],[0.3 0.35],'linewidth',7,'color','red')
+%     annotation('line', [0.49 0.54],[0.35 0.3],'linewidth',7,'color','red')
 end
 
-%% Gavish Donoho
-svs = diag(AnalysisResult.PODResult{1,1}.svdS);
-beta = PODResult{1,1}.nColsInOriginalGrid/PODResult{1,1}.nRowsInOriginalGrid;
-tau = optimal_SVHT_coef(beta,0) * median(svs); % find cut-off tau
-modes = svs(svs>tau);
-GDmode = length(modes); % Gavish Donoho threshold mode
+%%
+pivname = ['/Users/sambaker/Documents/Oxford-Uni/Papers/dmd/fig/TP/TP_',cyc,'_',ccm_cad,'_POD',num2str( nModes(mm) ),'_annotated.png'];
+exportgraphics(gcf,pivname,'resolution',600)
 
 %% POD approx paramters
 % nModes = [ 0 1 2 5 8 20 299 GDmode ];
-nModes = [ 0 299 GDmode ];
-CycleNo = 56;
+nModes = [ 299 ];
+CycleNo = [1:300];
 
 %% 
 figureprop.axes_lim = [ -25 25 -30 10 ];
@@ -87,18 +94,18 @@ figureprop.ylabel = '{\it z} (mm)';
 figureprop.sparse_vector = 2;
 figureprop.Clim = [ 0 50 ];
 
-%% Plot POD approx
-for mm = 1 : length( nModes )
-    [ PODApprox ] = Calc_PODApprox( PODResult{1,1}, nModes(mm), CycleNo );
+%% PODVel
+for mm = 1 : length( CycleNo )
+    [ PODApprox ] = Calc_PODApprox( PODResult{1,1}, nModes, CycleNo(mm) );
 %     PODApprox.X = MaskedData.X;
 %     PODApprox.Y = MaskedData.Y;
     PODApprox.X = InterpolatedData.X;
     PODApprox.Y = InterpolatedData.Y;
-    PODVel.(['POD',num2str(nModes(mm))]).u = PODApprox.U;
-    PODVel.(['POD',num2str(nModes(mm))]).v = PODApprox.V;
-    figure_output = ColourQuiver_SB( PODApprox.X, PODApprox.Y, PODApprox.U, PODApprox.V, figureprop );
-    ylim([-30 10])
-    title( [ num2str( CurrentCrankAngle ),' CAD, ', 'POD Approx., Order = ', num2str( nModes(mm) )] );
+    PODVel.(['cyc',num2str(CycleNo(mm))]).u = PODApprox.U;
+    PODVel.(['cyc',num2str(CycleNo(mm))]).v = PODApprox.V;
+%     figure_output = ColourQuiver_SB( PODApprox.X, PODApprox.Y, PODApprox.U, PODApprox.V, figureprop );
+%     ylim([-30 10])
+%     title( [ num2str( CurrentCrankAngle ),' CAD, ', 'POD Approx., Order = ', num2str( nModes(mm) )] );
 %     export_fig( [ 'TP Cycle ', num2str( cycle_No ), ' POD Approx at -270 CAD aTDCf' ], '-pdf', '-nocrop', '-append' )
 %     close all
 end
@@ -137,3 +144,33 @@ line1 = ['Gavish Donoho ensemble mean'];
 line2 = [t_cad,' CAD, ','POD Order = ', num2str( GDmode )];
 title({line1,line2});
 set(gcf, 'position', [440 352 560 446])
+
+%% Plot CFD 
+temp_x = CFDData.Data.x_PIVGrid;
+temp_y = CFDData.Data.z_PIVGrid;
+temp_CCM_u = ccmdata.(ccm_cad).u;
+temp_CCM_v = ccmdata.(ccm_cad).w;
+temp_CCM_SpeedMap = abs( complex( temp_CCM_u, temp_CCM_v ) );
+
+% Add PIV mask to CFD 
+[ ~, PIV_CAindex ] = ismember( AnalysisResult.CrankAngle, InterpolatedData.CrankAngle );
+
+temp_PIVem_u = mean( InterpolatedData.U( :,:,PIV_CAindex,: ), 4, 'omitnan' );
+temp_PIVem_v = mean( InterpolatedData.V( :,:,PIV_CAindex,: ), 4, 'omitnan' );
+temp_PIVem_SpeedMap = abs( complex( temp_PIVem_u, temp_PIVem_v ) );
+
+temp_PIV_mask = ~isnan( temp_PIVem_SpeedMap );
+temp_PIV_mask = double( temp_PIV_mask );
+temp_PIV_mask( temp_PIV_mask==0 ) = NaN;
+temp_CCM_u = temp_CCM_u .* temp_PIV_mask;
+temp_CCM_v = temp_CCM_v .* temp_PIV_mask;
+temp_CCM_SpeedMap = temp_CCM_SpeedMap .* temp_PIV_mask;
+
+ColourQuiver(temp_x, temp_y, temp_CCM_u ,temp_CCM_v, figureprop)
+ylim([-30 10])
+% title(['CFD ',num2str(CurrentCrankAngle),' CAD'])
+% set(gcf, 'position', [440 377 560 290])
+name = ['/Users/sambaker/Documents/Oxford-Uni/Papers/dmd/fig/TP/TP_CFD_',ccm_cad,'.png'];
+
+%%
+exportgraphics(gcf,name,'resolution',600)

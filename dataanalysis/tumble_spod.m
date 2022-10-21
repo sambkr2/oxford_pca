@@ -4,7 +4,7 @@
 load('../dataformatting/x20180706_Tumble_CR12p5_T1_C33_DVA_Motored_Processed_all_masked.mat')
 
 %% Get original data
-CrankAngle_plot = -250;
+CrankAngle_plot = -285;
 [ ~, CrankAngleNo_plot ] = ismember( CrankAngle_plot, MaskedData.CrankAngle );
 
 % Get spatial vectors
@@ -64,6 +64,9 @@ dt = 1/(rpm/60)*2;
 % But first, just try to plot the SPOD modes by calculating SPODApprox
 % go through the algorithm step by step and plot
 
+%% Add mean back in
+av = mean(velo,2,'omitnan');
+
 %% Reconstruction
 % Number of velocity locations
 nVel = size(velo,1)/2;
@@ -71,14 +74,15 @@ nVel = size(velo,1)/2;
 % First choose the SPOD modes and frequency to plot
 sMode = [1];
 
-for fplot = 1:9
+for fplot = 1:length(f2)
     %   
-    data = P2(fplot,:,sMode)*L2(fplot,sMode);
+    data = real(P2(fplot,:,sMode))*L2(fplot,sMode);
     data = data';
+    data = data + av;
     
     % Retrieve velocities
-    spodU = real(data(1:nVel));
-    spodV = real(data(nVel+1:end));
+    spodU = data(1:nVel);
+    spodV = data(nVel+1:end);
     
     % Reshape into PIV grid format
     pivx = size(CFDData.Data.x_PIVGrid,1);
@@ -96,12 +100,12 @@ for fplot = 1:9
     figureprop.sparse_vector = 2;
     figureprop.Clim = [ 0 100 ];
     
-    figure_output = ColourQuiver( MaskedData.X, MaskedData.Y, splotu*1, splotv*1, figureprop );    
+    figure_output = ColourQuiver( MaskedData.X, MaskedData.Y, splotu*1000, splotv*1000, figureprop );    
     ylim([-30 10])
     t = {['SPOD mode 1', num2str(f2(fplot)), ' Hz']};
     title(t)
     
-    message = ['RI, sMode ',num2str(sMode),', f ',num2str(fplot)];
+    message = ['RI, sMode ',num2str(sMode),', f ',num2str(f2(fplot))];
     disp(message)
     Find_Relevance_Index( complex( ccmu, ccmv ), complex( splotu, splotv ), 'normal_num' )
 end

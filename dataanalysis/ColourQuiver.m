@@ -80,7 +80,7 @@ end
 temp_Clim = get(gca, 'Clim');
 
 hcb = colorbar;
-
+set(hcb,'position',[0.8635 0.2244 0.0210 0.55])
 
 if isempty( figureprop.velocity_normalisation ) || ( figureprop.velocity_normalisation == 1 )
     hcb.Label.String = 'Speed (m/s)';
@@ -107,8 +107,8 @@ quiver( HighSpeedCoordinates_x, HighSpeedCoordinates_y, quiver_length * cos( Hig
 axis equal
 
 
-set( gca, 'FontSize', 22, 'FontName', 'Times New Roman', 'xtick', -100:10:100, 'ytick', -100:10:100 );
-
+set( gca, 'FontSize', 34, 'FontName', 'Times New Roman', 'xtick', -100:10:100, 'ytick', -100:10:100, 'linewidth', 1.2);
+set(gca, 'YTickLabel',[])
 
 if ~isempty( figureprop.axes_lim )
     axis( figureprop.axes_lim );

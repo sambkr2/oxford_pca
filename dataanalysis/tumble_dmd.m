@@ -42,7 +42,8 @@ X1 = velo(:,1:end-1);
 X2 = velo(:,2:end);
 
 % Choose cut-off
-r = 299;
+% r = 299;
+r = GDmode;
 
 % DMD
 [P2, L2, b2] = DMD(X1,X2,r);
@@ -56,42 +57,44 @@ rpm = 1500;
 dt = 1/(rpm/60)*2;
 
 % get DMD frequency
-i = diag(L2);
-im = imag(i);
-
-% calculate characteristic frequency
-fi = (1/dt)*log(i);
-f = imag(fi);
+dmdFreq = log(diag(L2))/dt/2/pi;
 
 % get amplitude
 amp = abs(b2(:));
 
 % scatter raw
-figure
-semilogy(imag(i), amp,'o','MarkerFaceColor','blue')
-xlim([0 1])
+% figure
+% semilogy(imag(dmdFreq), amp,'o','MarkerFaceColor','blue')
+% xlim([0 1])
 
 % scatter neat
 figure1 = figure( 'Color', [ 1 1 1 ] );
 axes1 = axes( 'Parent', figure1, 'FontName', 'Times', 'FontSize', 20,'linewidth',1);
 hold( axes1, 'on' )
 box( axes1, 'on')
-semilogy(f, amp,'o','MarkerFaceColor','blue')
-xlim([0 40])
-xlabel('Frequency')
+semilogy(imag(dmdFreq), amp,'o','MarkerFaceColor','blue')
+xlim([0 6.5])
+xlabel('Frequency (Hz)')
 ylabel('DMD mode amplitude')
-title('DMD spectrum: tumble plane, -285 CAD')
+title({'De-noised spectrum:','tumble plane, -285 CAD'})
+% title({'Raw spectrum:','tumble plane, -285 CAD'})
 
-%% Plot first DMD mode
+%% export fig
+name = ['/Users/sambaker/Documents/Oxford-Uni/Papers/dmd/fig/TP/tp_dmdspectrum_clean_',ccm_cad,'.png'];
+% name = ['/Users/sambaker/Documents/Oxford-Uni/Papers/dmd/fig/TP/tp_dmdspectrum_raw_',ccm_cad,'.png'];
+exportgraphics(gcf,name,'resolution',600)
+
+%% Plot settings
 pivgrid = CFDData.Data.x_PIVGrid;
 
 figureprop.axes_lim = [ -25 25 -30 10 ];
 figureprop.xlabel = '{\it x} (mm)';
 figureprop.ylabel = '{\it z} (mm)';
-% figureprop.velocity_normalisation = 5;
+figureprop.velocity_normalisation = 5;
 figureprop.sparse_vector = 2;
 figureprop.Clim = [ 0 50 ];
 
+%% Plot first mode
 index = 1;
 first = P2(:,index)*L2(index,index)*b2(index,index);
 
@@ -133,25 +136,25 @@ ylim([-30 10])
 t = {['All modes reconstructed']};
 title(t)
 
-%% Find largest frequencies
+%% Find largest amplitudes
 % sort amplitudes in size order
-dvals = sort(amp(:), 'descend');
+dvals = sort(amp, 'descend');
 
 % number of values to look at
-nvals = 11;
-largest11 = dvals(1:nvals);
+nvals = 15;
+largest = dvals(1:nvals);
 
 % find index in amp/b2 where the largest values are
 ind = zeros(nvals,1);
 for k = 1:nvals
-    ind(k,1) = find(amp == largest11(k));
+    ind(k,1) = find(amp == largest(k));
 end
 
 % attach frequency to amp inde
-ampf = [ind, f(ind)];
+ampf = [ind, dmdFreq(ind)];
 
 % find index of positive frequencies
-posampf_ind = ampf(:,2) >= 0;
+posampf_ind = imag(ampf(:,2)) >= 0;
 
 % retain positive frequency indices
 posf_ind = ampf(posampf_ind);
@@ -178,8 +181,46 @@ for kk = 1:length(posf_ind)
     
     figure_output = ColourQuiver( MaskedData.X, MaskedData.Y, dmdplotu, dmdplotv, figureprop );    
     ylim([-30 10])
-    t = {['DMD mode ', num2str(posf_ind(kk)), ', ', num2str(round(f(posf_ind(kk)))),' Hz']};
+    t = {['DMD mode ', num2str(posf_ind(kk)), ', ', num2str(round(imag(dmdFreq(posf_ind(kk))))),' Hz']};
     title(t)
+
+end
+
+%% WARNING
+% Careful not to overwrite images!!
+
+%% Inspect at 0 Hz freq
+% near-zero frequencies
+zeroind = imag(dmdFreq) <= 0.1 & imag(dmdFreq) >= 0;
+zeroindf = find(zeroind == 1);
+
+for jj = 1:length(zeroindf)
+    
+    % DMD mode * DMD eigenvalue * amplitude
+%     recon = P2(:,posf_ind(kk))*L2(posf_ind(kk),posf_ind(kk))*b2(posf_ind(kk),1);
+%     recon = P2(:,zeroindf(jj))*L2(zeroindf(jj),zeroindf(jj))*amp(zeroindf(jj),1);
+    recon = P2(:,zeroindf(jj))*-amp(zeroindf(jj),1);
+    
+    % Separate U and V velocities
+    locs = size(recon);
+    Ucol = real(recon(1:locs/2));
+    Vcol = real(recon(locs/2+1:end));
+    
+    % Reshape into PIV grid format
+    pivx = size(pivgrid,1);
+    pivz = size(pivgrid,2);
+    dmdplotu = NaN(pivx,pivz);
+    dmdplotv = NaN(pivx,pivz);
+    dmdplotu(originalIndex) = Ucol;
+    dmdplotv(originalIndex) = Vcol;
+    
+    figure_output = ColourQuiver( MaskedData.X, MaskedData.Y, dmdplotu, dmdplotv, figureprop );    
+%     t = {['DMD mode ', num2str(zeroindf(jj)), ', ', num2str(round(imag(dmdFreq(zeroindf(jj))))),' Hz']};
+%     title(t)
+
+%     set(gcf, 'position', [440 377 560 290])
+    dmdname = ['/Users/sambaker/Documents/Oxford-Uni/Papers/dmd/fig/TP/DMD',num2str(zeroindf(jj)),'.png'];
+    exportgraphics(gcf,dmdname,'resolution',600)
 
 end
 

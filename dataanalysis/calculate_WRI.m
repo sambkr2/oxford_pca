@@ -65,8 +65,8 @@ function [output] = calculate_WRI(a_u,a_v,b_u,b_v,mask,varargin)
 
 
     % calculate median velocity present in either field
-    V_mag_med_aa = nanmedian(V_Mag_aa(:));
-    V_mag_med_bb = nanmedian(V_Mag_bb(:));
+    V_mag_med_aa = median(V_Mag_aa(:),'omitnan');
+    V_mag_med_bb = median(V_Mag_bb(:),'omitnan');
 
 
     %% Step 3 - Apply weighting to alignment penalty
